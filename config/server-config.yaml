@@ -1,0 +1,4 @@
+port: "8080"
+hashcash-zeros-count: 3
+hashcash-timeout: 300
+hashcash-max-iterations: 1000000
