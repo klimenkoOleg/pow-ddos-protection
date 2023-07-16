@@ -33,13 +33,7 @@ func NewTracer(appName string, log *zap.Logger) (*Tracer, error) {
 		trace.WithBatcher(exp),
 		trace.WithResource(newResource(appName)),
 	)
-	/*s.OnShutdown(func() {
-		log.Info("shutting down tracing provider")
 
-		if err := tp.Shutdown(ctx); err != nil {
-			log.Error("failed to shutdown tracing provider")
-		}
-	})*/
 	otel.SetTracerProvider(tp)
 
 	return &Tracer{tp, log}, nil
@@ -54,11 +48,6 @@ func (t *Tracer) OnTracerShutdown() func(ctx context.Context) {
 			t.log.Error("failed to shutdown tracing provider")
 		}
 	}
-	/*t.log.Info("shutting down tracing provider")
-
-	if err := t.tp.Shutdown(ctx); err != nil {
-		t.log.Error("failed to shutdown tracing provider")
-	}*/
 }
 
 func newResource(appName string) *resource.Resource {
@@ -71,31 +60,3 @@ func newResource(appName string) *resource.Resource {
 	)
 	return r
 }
-
-/*
-// EnableTracing enables tracing.
-func (t *Tracer) EnableTracing(ctx context.Context, appName string, s OnShutdowner) error {
-	exp, err := stdouttrace.New(
-		stdouttrace.WithWriter(io.Discard),
-		stdouttrace.WithPrettyPrint(),
-		stdouttrace.WithoutTimestamps(),
-	)
-	if err != nil {
-		return err
-	}
-
-	t.tp = trace.NewTracerProvider(
-		trace.WithBatcher(exp),
-		trace.WithResource(newResource(appName)),
-	)
-	s.OnShutdown(func() {
-		t.log.Info("shutting down tracing provider")
-
-		if err := tp.Shutdown(ctx); err != nil {
-			logging.From(ctx).Error("failed to shutdown tracing provider")
-		}
-	})
-	otel.SetTracerProvider(tp)
-
-	return nil
-}*/

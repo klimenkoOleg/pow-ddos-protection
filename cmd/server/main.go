@@ -3,40 +3,42 @@ package main
 import (
 	"context"
 	"pow-ddos-protection/internal/core/app"
-	"pow-ddos-protection/internal/core/config"
 	"pow-ddos-protection/internal/core/logging"
 	"pow-ddos-protection/internal/core/tracing"
 	"pow-ddos-protection/internal/server"
 )
 
+// main - All explicit dependencies are combined in main.
 func main() {
 	log := logging.NewDefaultLogger()
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	defer ctxCancel()
 
-	config, err := config.LoadAppConfig(log)
+	config, err := server.LoadServerConfig(log)
 	logging.FailIfErr(err, "Can't load config")
-	appName := config.AppConfig.AppName
+	appName := config.AppName
 
 	tr, err := tracing.NewTracer(appName, log)
 	logging.FailIfErr(err, "Tracer init error")
 
-	clientApp := app.NewApp(config, ctx, logging.NewDefaultLogger(), tr)
+	clientApp := app.NewApp(ctx, logging.NewDefaultLogger(), tr)
 	clientApp.OnShutdown(tr.OnTracerShutdown())
 
-	clientApp.Start(startServer)
+	clientApp.Start(startServer(config))
 }
 
-func startServer(ctx context.Context, a *app.App) ([]app.Listener, error) {
-	h, err := server.New(a.Cfg, a.Log)
-	if err != nil {
-		return nil, err
+// startServer - tto be invoked on the App start
+func startServer(serverConf *server.ServerConfig) app.OnStart {
+	return func(ctx context.Context, a *app.App) ([]app.Listener, error) {
+		h, err := server.New(serverConf, a.Log)
+		if err != nil {
+			return nil, err
+		}
+
+		// Start listening for TCP requests
+		return []app.Listener{
+			h,
+		}, nil
 	}
-
-	// Start listening for HTTP requests
-	return []app.Listener{
-		h,
-	}, nil
-
 }

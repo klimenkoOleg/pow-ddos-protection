@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func LoadPrivateRSA(fileName string, log zap.Logger) (*rsa.PrivateKey, error) {
+func LoadPrivateRSA(fileName string, log *zap.Logger) (*rsa.PrivateKey, error) {
 	pemString, err := os.ReadFile(fileName)
 	if err != nil {
 		log.Error("Can't read private key file", zap.Error(err))

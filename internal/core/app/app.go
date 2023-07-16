@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"pow-ddos-protection/internal/core/config"
 	"sync"
 	"syscall"
 
@@ -17,8 +16,8 @@ type OnShutdownFunc func(ctx context.Context)
 
 // App represents client application.
 type App struct {
-	ctx           context.Context
-	Cfg           *config.Config
+	ctx context.Context
+	//Cfg           *config.Config
 	shutdownFuncs []OnShutdownFunc // called on the app exit
 	Log           *zap.Logger      // prefer explicit dependency over context or global variable
 	tracer        *tracing.Tracer  // prefer explicit dependency
@@ -32,9 +31,9 @@ type Listener interface {
 type OnStart func(context.Context, *App) ([]Listener, error)
 
 // NewApp Factory function with all the explicit dependencies, useful for stubs in testing.
-func NewApp(cfg *config.Config, ctx context.Context, log *zap.Logger, tracer *tracing.Tracer) *App {
+func NewApp(ctx context.Context, log *zap.Logger, tracer *tracing.Tracer) *App {
 	log.Info("app init...")
-	return &App{Cfg: cfg, ctx: ctx, Log: log, tracer: tracer}
+	return &App{ctx: ctx, Log: log, tracer: tracer}
 }
 
 // Start starts the application.

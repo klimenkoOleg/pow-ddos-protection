@@ -1,4 +1,4 @@
-package server
+package client
 
 import (
 	"crypto/rsa"
@@ -8,22 +8,21 @@ import (
 )
 
 const (
-	baseConfigPath = "config/server-config.yaml"
-	envConfigPath  = "config/server-config-%s.yaml"
+	baseConfigPath = "config/client-config.yaml"
+	envConfigPath  = "config/client-config-%s.yaml"
 	rsaPrivateKey  = "config/key.pem"
 )
 
-type ServerConfig struct {
-	AppName            string `yaml:"app-name"`
-	Port               string `yaml:"port"`
-	HashcashZerosCount int    `yaml:"hashcash-zeros-count"`
-	HashcashTimeout    int    `yaml:"hashcash-timeout"`
-	PrivateKey         *rsa.PrivateKey
+type ClientConfig struct {
+	AppName               string `yaml:"app-name"`
+	ServerURL             string `yaml:"server-url"`
+	HashcashMaxIterations int    `yaml:"hashcash-max-iterations"`
+	PrivateKey            *rsa.PrivateKey
 }
 
 // LoadServerConfig loads the configuration from the config/server-config.yaml file.
-func LoadServerConfig(log *zap.Logger) (*ServerConfig, error) {
-	appCfg := &ServerConfig{}
+func LoadClientConfig(log *zap.Logger) (*ClientConfig, error) {
+	appCfg := &ClientConfig{}
 	err := config.LoadAppConfig(appCfg, baseConfigPath, envConfigPath)
 	if err != nil {
 		return nil, config.ErrRsaFile.Wrap(err)

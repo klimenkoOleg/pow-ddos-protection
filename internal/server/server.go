@@ -9,7 +9,6 @@ import (
 	"go.uber.org/zap"
 	"math/rand"
 	"net"
-	"pow-ddos-protection/internal/core/config"
 	"pow-ddos-protection/internal/core/errors"
 	"pow-ddos-protection/internal/message"
 	"pow-ddos-protection/internal/pow"
@@ -46,15 +45,15 @@ var Quotes = []string{
 
 type Server struct {
 	//conf *Config
-	cfg  *config.Config
+	cfg  *ServerConfig
 	log  *zap.Logger
 	sock net.Listener
 	//handler func(net.Conn, zap.Logger)
 	//powReceive pow.Receiver
 }
 
-func New(cfg *config.Config, log *zap.Logger) (*Server, error) {
-	port := cfg.AppConfig.Port
+func New(cfg *ServerConfig, log *zap.Logger) (*Server, error) {
+	port := cfg.Port
 	log.Info(fmt.Sprintf("tcp server starting on address: %s", port))
 
 	socket, err := net.Listen("tcp", ":"+port)
@@ -86,16 +85,6 @@ func (s *Server) Close() error {
 
 // his is needed for APP design!!!
 func (s *Server) Listen(ctx context.Context) error {
-	/*s.log.Info(fmt.Sprintf("http server starting on port: %s", s.port))
-
-	err := s.server.ListenAndServe()
-	if err != nil {
-		return ErrServer.Wrap(err)
-	}
-
-	logging.From(ctx).Info("http server stopped")
-
-	return nil*/
 	for {
 		conn, err := s.sock.Accept()
 		connID := uuid.New()
@@ -138,7 +127,7 @@ func (s *Server) serveConn(conn net.Conn, connID uuid.UUID) {
 	randValue := rand.Intn(100000)
 	hashcash := pow.HashcashData{
 		Version:    1,
-		ZerosCount: s.cfg.AppConfig.HashcashZerosCount,
+		ZerosCount: s.cfg.HashcashZerosCount,
 		Date:       time.Now().Unix(),
 		Resource:   conn.RemoteAddr().String(),
 		Rand:       base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%d", randValue))),
@@ -191,7 +180,7 @@ func (s *Server) serveConn(conn net.Conn, connID uuid.UUID) {
 	}
 
 	// sent solution should not be outdated
-	if time.Now().Unix()-hashcash.Date > int64(s.cfg.AppConfig.HashcashTimeout) {
+	if time.Now().Unix()-hashcash.Date > int64(s.cfg.HashcashTimeout) {
 		s.log.Error("hashcash texpired")
 		return
 	}
@@ -204,55 +193,12 @@ func (s *Server) serveConn(conn net.Conn, connID uuid.UUID) {
 	_, err = hashcash.ComputeHashcash(maxIter)
 	CheckErr(s.log, err)
 
-	//msg := protocol.Message{protocol
-	//	Header:  protocol.ResponseResource,
-	//	Payload: Quotes[rand.Intn(4)],
-	//}
-
 	quoteMsg := &message.Message{message.Step4QuoteResponse, []byte(Quotes[rand.Intn(4)])}
 	//privKey := *s.cfg.PrivateKey
 	quoteResponseMsg, err := message.EncodeRSAGob(quoteMsg, privKey.PublicKey)
 	CheckErr(s.log, err)
 
 	conn.Write(quoteResponseMsg)
-
-	//
-
-	/*// incoming request
-	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
-	if err != nil {
-		log.Fatal(err)
-	}
-	receivedDecryptedMsg, err := message.DecodeRSAGob(buffer[:n], *s.cfg.PrivateKey)
-	CheckErr(s.log, err)*/
-
-	/*s.log.Info("Got message:" + strconv.Itoa(receivedDecryptedMsg.Header) + " : " + string(receivedDecryptedMsg.Payload))
-
-	// write data to response
-	time := time.Now().Format(time.ANSIC)
-	responseStr := fmt.Sprintf("Your message is: %s. Received time: %v", receivedDecryptedMsg.Payload, time)
-	s.log.Info("MESSAGE SENDING: " + responseStr)
-
-	responseMsg := &message.Message{2, []byte(responseStr)}
-	privKey := *s.cfg.PrivateKey
-	encryptedMsg, err := message.EncodeRSAGob(responseMsg, privKey.PublicKey)
-	CheckErr(s.log, err)
-
-	conn.Write(encryptedMsg)*/
-
-	//checkDuration, err := s.powReceive(conn)
-	//if err != nil {
-	//	log.Warn().Err(err).Dur("check_duration", checkDuration).Msg("refuse conn")
-	//	return
-	//}
-	//log.Debug().
-	//	Int("difficulty", int(s.conf.Difficulty)).
-	//	Dur("check_duration", checkDuration).
-	//	Msg("is valid proof")
-
-	// TODO
-	//s.handler(conn, log)
 }
 
 func CheckErr(log *zap.Logger, err error) {
@@ -260,59 +206,3 @@ func CheckErr(log *zap.Logger, err error) {
 		log.Fatal("client error", zap.Error(err))
 	}
 }
-
-/*
-	func StartServer(conf *Config, log zap.Logger, handler func(net.Conn, zap.Logger)) (*Server, error) {
-		socket, err := net.Listen("tcp", conf.TCPAddress)
-		if err != nil {
-			return nil, err
-		}
-		s := &Server{
-			conf:       conf,
-			log:        log,
-			sock:       socket,
-			handler:    handler,
-			//powReceive: pow.NewReceiver(conf.Difficulty, conf.ProofTokenSize),
-		}
-		go s.listen()
-		return s, nil
-	}
-*/
-
-/*
-func (s *Server) listen() {
-	for i := 0; ; i++ {
-		conn, err := s.sock.Accept()
-		if err != nil {
-			if errors.Is(err, net.ErrClosed) {
-				return
-			}
-			s.log.Warn().Err(err).Msg("failed to listen socket")
-			continue
-		}
-		go s.serveConn(conn, i)
-	}
-}
-
-func (s *Server) serveConn(conn net.Conn, connID int) {
-	defer conn.Close()
-
-	log := s.log.With().
-		Int("id", connID).
-		Str("addr", conn.RemoteAddr().String()).
-		Logger()
-	log.Trace().Msg("receive conn")
-
-	checkDuration, err := s.powReceive(conn)
-	if err != nil {
-		log.Warn().Err(err).Dur("check_duration", checkDuration).Msg("refuse conn")
-		return
-	}
-	log.Debug().
-		Int("difficulty", int(s.conf.Difficulty)).
-		Dur("check_duration", checkDuration).
-		Msg("is valid proof")
-
-	s.handler(conn, log)
-}
-*/
