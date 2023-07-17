@@ -16,7 +16,7 @@ const (
 
 type ClientConfig struct {
 	AppName                 string `yaml:"app-name"`
-	ServerAddress           string `yaml:"server-address"`
+	ServerAddress           string `yaml:"server-address" env:"SERVER_ADDRESS"`
 	RequestsCreationTimeout int    `yaml:"requests-creation-timeout"`
 	NumberOfClients         int    `yaml:"number-of-clients"`
 	RequestsPerClient       int    `yaml:"requests-per-client"`

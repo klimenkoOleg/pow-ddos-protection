@@ -1,16 +1,16 @@
-ersion: '3'
+version: '3'
 
 services:
 
   server:
     build:
-      dockerfile: deploy/server.Dockerfile
+      dockerfile: deployments/server.Dockerfile
       context: .
     restart: always
 
   client:
     build:
-      dockerfile: deploy/client.Dockerfile
+      dockerfile: deployments/client.Dockerfile
       context: .
     restart: always
     depends_on:
@@ -18,4 +18,4 @@ services:
     links:
       - server
     environment:
-      - SERVER_ADDR=server:9000
+      - SERVER_ADDRESS=server:8080

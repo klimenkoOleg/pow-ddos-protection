@@ -7,11 +7,11 @@ WORKDIR /opt
 COPY go.mod go.sum ./
 RUN  go mod download
 
-COPY cmd/server/      cmd/server/
+COPY cmd/server/       cmd/server/
 COPY config/           config/
 COPY internal/core/    internal/core/
-COPY internal/pow    internal/pow
-COPY internal/server internal/server
+COPY internal/pow/     internal/pow/
+COPY internal/server   internal/server
 
 RUN go test -cover -race -v ./...
 

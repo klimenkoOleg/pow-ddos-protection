@@ -7,9 +7,9 @@ WORKDIR /opt
 COPY go.mod go.sum ./
 RUN  go mod download
 
-COPY cmd/client       cmd/client
-COPY config           config
-COPY internal/core/   internal/pow/
+COPY cmd/client/      cmd/client/
+COPY config/          config/
+COPY internal/core/   internal/core/
 COPY internal/pow/    internal/pow/
 COPY internal/client  internal/client
 

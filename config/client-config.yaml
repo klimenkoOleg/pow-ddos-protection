@@ -1,8 +1,8 @@
 app-name: "client_pow"
 requests-creation-timeout: 50       # in ms
 number-of-clients: 10
-requests-per-client: 5                  # number of requests to send
-server-address: "localhost:8080"    # remote server address
+requests-per-client: 5              # number of requests to send
+server-address: "localhost2:8080"   # remote server address
 hashcash-zeros-count: 3             # number of zeros for hashcash
 hashcash-timeout: 300               # in sec
 hashcash-max-iterations: 1000000    # to solve PoW Hashcash challenge
