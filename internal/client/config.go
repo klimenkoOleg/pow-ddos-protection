@@ -2,6 +2,7 @@ package client
 
 import (
 	"crypto/rsa"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"pow-ddos-protection/internal/core/config"
 	"pow-ddos-protection/internal/core/encryption"
@@ -17,23 +18,23 @@ type ClientConfig struct {
 	AppName                 string `yaml:"app-name"`
 	ServerAddress           string `yaml:"server-address"`
 	RequestsCreationTimeout int    `yaml:"requests-creation-timeout"`
-	NumberOfClients         int    `yaml:"requests-count"`
-	RequestsPerClient       int    `yaml:"requests-count"`
+	NumberOfClients         int    `yaml:"number-of-clients"`
+	RequestsPerClient       int    `yaml:"requests-per-client"`
 	HashcashMaxIterations   int    `yaml:"hashcash-max-iterations"`
 	PrivateKey              *rsa.PrivateKey
 }
 
-// LoadServerConfig loads the configuration from the config/server-config.yaml file.
+// LoadClientConfig loads the configuration from the config/server-config.yaml file.
 func LoadClientConfig(log *zap.Logger) (*ClientConfig, error) {
 	appCfg := &ClientConfig{}
 	err := config.LoadAppConfig(appCfg, baseConfigPath, envConfigPath)
 	if err != nil {
-		return nil, config.ErrRsaFile.Wrap(err)
+		return nil, errors.Wrap(err, "failed load configs")
 	}
 
 	privateKey, err := encryption.LoadPrivateRSA(rsaPrivateKey, log)
 	if err != nil {
-		return nil, config.ErrRsaFile.Wrap(err)
+		return nil, errors.Wrap(err, "failed loD RSA file")
 	}
 	appCfg.PrivateKey = privateKey
 

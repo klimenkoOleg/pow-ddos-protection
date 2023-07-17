@@ -1,7 +1,7 @@
-port: "8080"
+app-name: "client_pow"
 requests-creation-timeout: 50       # in ms
-requests-per-client: 50                  # number of requests to send
-  RequestsPerClient
+number-of-clients: 10
+requests-per-client: 5                  # number of requests to send
 server-address: "localhost:8080"    # remote server address
 hashcash-zeros-count: 3             # number of zeros for hashcash
 hashcash-timeout: 300               # in sec
