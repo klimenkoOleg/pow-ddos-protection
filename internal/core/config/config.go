@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"os"
-	"pow-ddos-protection/internal/core/errors"
 )
 
 const (
 	// ErrValidation is returned when the configuration is invalid.
-	ErrValidation = errors.Error("invalid configuration")
+	ErrValidation = errors.Errorf("invalid configuration")
 	// ErrEnvVars is returned when the environment variables are invalid.
 	ErrEnvVars = errors.Error("failed parsing env vars")
 	// ErrRead is returned when the configuration file cannot be read.
@@ -21,12 +21,6 @@ const (
 	// ErrRsaFile is returned when RSA privae key file reading failed to read.
 	ErrRsaFile = errors.Error("failed parsing env vars")
 )
-
-//// Config represents the configuration of our application.
-//type Config struct {
-//	appConfig interface{}
-//	Log       *zap.Logger
-//}
 
 func LoadAppConfig(appConfig interface{}, baseConfigPath, envConfigPath string) error {
 	if err := loadFromFiles(appConfig, baseConfigPath, envConfigPath); err != nil {

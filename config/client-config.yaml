@@ -1,4 +1,8 @@
 port: "8080"
-hashcash-zeros-count: 3
-hashcash-timeout: 300
-hashcash-max-iterations: 1000000
+requests-creation-timeout: 50       # in ms
+requests-per-client: 50                  # number of requests to send
+  RequestsPerClient
+server-address: "localhost:8080"    # remote server address
+hashcash-zeros-count: 3             # number of zeros for hashcash
+hashcash-timeout: 300               # in sec
+hashcash-max-iterations: 1000000    # to solve PoW Hashcash challenge

@@ -14,10 +14,13 @@ const (
 )
 
 type ClientConfig struct {
-	AppName               string `yaml:"app-name"`
-	ServerURL             string `yaml:"server-url"`
-	HashcashMaxIterations int    `yaml:"hashcash-max-iterations"`
-	PrivateKey            *rsa.PrivateKey
+	AppName                 string `yaml:"app-name"`
+	ServerAddress           string `yaml:"server-address"`
+	RequestsCreationTimeout int    `yaml:"requests-creation-timeout"`
+	NumberOfClients         int    `yaml:"requests-count"`
+	RequestsPerClient       int    `yaml:"requests-count"`
+	HashcashMaxIterations   int    `yaml:"hashcash-max-iterations"`
+	PrivateKey              *rsa.PrivateKey
 }
 
 // LoadServerConfig loads the configuration from the config/server-config.yaml file.

@@ -10,24 +10,25 @@ import (
 	"pow-ddos-protection/internal/pow"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type Client struct {
 	Cfg *ClientConfig
-	Log zap.Logger
+	Log *zap.Logger
 }
 
-// old startFetchWorkers
+// Listen invoked by App in a goroutine
 func (c *Client) Listen(ctx context.Context) error {
-	// TODO mpve to client
-	creationPause := 500 //conf.Timeout / time.Duration(conf.FetchWorkers)
+	creationPause := c.Cfg.RequestsCreationTimeout
 
 	wg := sync.WaitGroup{}
 
-	for i := 0; i < 10; i++ { //conf.FetchWorkers; i++ {
+	for i := 0; i < c.Cfg.NumberOfClients; i++ {
 		go func() {
 			wg.Add(1)
-			c.runFetchWorker(ctx, "localhost:8080", 500, c.Log, i)
+			c.runClient(ctx, c.Cfg.ServerAddress, 500, c.Log, i)
 		}()
 		time.Sleep(time.Duration(creationPause))
 	}
@@ -37,81 +38,102 @@ func (c *Client) Listen(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) runFetchWorker(ctx context.Context, serverAddr string, timeout int, log zap.Logger, id int) {
+func (c *Client) runClient(ctx context.Context, serverAddr string, timeout int, log *zap.Logger, id int) {
 	log.Info("worked started", zap.Int("id", id))
 
-	// TODO get number of iterations from config
-	for i := 0; i < 10; i++ {
+	for i := 0; i < c.Cfg.RequestsPerClient; i++ {
 		select {
-		// TODO is it needed?
 		case <-ctx.Done():
 			return
 		default:
-			fetchQuote(log, serverAddr, c.Cfg.PrivateKey, c.Cfg.HashcashMaxIterations)
+			quote, err := runQuoteWorkflow(log, serverAddr, c.Cfg.PrivateKey, c.Cfg.HashcashMaxIterations)
+			if err != nil {
+				log.Error("Client could not get quote", zap.Error(err))
+			} else {
+				log.Info("Got the quote, use it wisely", zap.String("quote", quote))
+			}
 			time.Sleep(time.Duration(timeout))
-
 		}
 	}
 }
 
-func fetchQuote(log zap.Logger, serverAddr string, privateKey *rsa.PrivateKey, hashcashMaxIterations int) string {
+func runQuoteWorkflow(log *zap.Logger, serverAddr string, privateKey *rsa.PrivateKey, hashcashMaxIterations int) (string, error) {
 	log.Info("connecting to server", zap.String("server_addr", serverAddr))
-	// TODO probably open conneection a leve higher
 	conn, err := net.Dial("tcp", serverAddr)
 	defer conn.Close()
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed connect to server address: "+serverAddr)
+	}
+
+	log.Info("connected to server", zap.String("server_addr", serverAddr))
 
 	// 1. requesting challenge
 	msg := &message.Message{Header: message.Step1ChallengeRequest}
 	encryptedMsg, err := message.EncodeRSAGob(msg, privateKey.PublicKey)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed requesting challenge")
+	}
 	_, err = conn.Write(encryptedMsg)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed sent challenge to client")
+	}
 
 	// reading and parsing response
 	received := make([]byte, 1024)
 	n, err := conn.Read(received)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed get challenge answer")
+	}
 	receivedDecreptedMsg, err := message.DecodeRSAGob(received[:n], *privateKey)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed decode challenge answer")
+	}
 
+	// unwrap PoW task from server
 	var hashcash pow.HashcashData
 	err = json.Unmarshal(receivedDecreptedMsg.Payload, &hashcash)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed extract Payload")
+	}
 	log.Info("PoW task from server", zap.String("hashcash", hashcash.Stringify()))
 
-	// 2. got challenge, compute hashcash
-	// TODO
+	// 2. PoW challenge: having the challenge, compute hashcash
 	hashcash, err = hashcash.ComputeHashcash(hashcashMaxIterations)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed validate Hashcash")
+	}
 	log.Info("PoW computed", zap.String("hashcash", hashcash.Stringify()))
 
 	// marshal solution to json
 	hashcashBytes, err := json.Marshal(hashcash)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed marshal hashcash")
+	}
 
 	// 3. send challenge solution back to server
 	solutionMsg := &message.Message{Header: message.Step3QuoteRequest, Payload: hashcashBytes}
 	encryptedMsg, err = message.EncodeRSAGob(solutionMsg, privateKey.PublicKey)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed encrypt PoW solution")
+	}
 	_, err = conn.Write(encryptedMsg)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed sent PoW solution")
+	}
 	log.Info("PoW solution sent to server")
 
 	// 4. get result quote from server
 	n, err = conn.Read(received)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed recaive PoW solution")
+	}
 	receivedDecreptedMsg, err = message.DecodeRSAGob(received[:n], *privateKey)
-	CheckErr(log, err)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed decode server quote")
+	}
 
 	citation := string(receivedDecreptedMsg.Payload)
 	log.Info("wisdom citation", zap.String("citation", citation))
 
-	return citation
-}
-
-func CheckErr(log zap.Logger, err error) {
-	if err != nil {
-		log.Fatal("client error", zap.Error(err))
-	}
+	return citation, nil
 }

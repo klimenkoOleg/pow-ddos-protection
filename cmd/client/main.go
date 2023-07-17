@@ -21,12 +21,12 @@ func main() {
 	clientApp.Start(startClient(config))
 }
 
-// startServer - tto be invoked on the App start
+// startClient - to be invoked on the App start, run in a goroutine as a Listener
 func startClient(clientConf *client.ClientConfig) app.OnStart {
 	return func(ctx context.Context, a *app.App) ([]app.Listener, error) {
-		c := &client.Client{clientConf, *a.Log}
+		c := &client.Client{clientConf, a.Log}
 
-		// Start listening for TCP requests
+		// Start sending requests for the book quotes
 		return []app.Listener{
 			c,
 		}, nil
