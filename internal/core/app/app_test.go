@@ -5,8 +5,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"pow-ddos-protection/internal/client"
-	"pow-ddos-protection/internal/core/logging"
 	"testing"
 )
 
@@ -21,7 +19,7 @@ func TestApp(t *testing.T) {
 	ctx := context.Background()
 
 	ctx = context.WithValue(ctx, "logger", logger)
-	clientApp := NewApp(ctx, logging.NewDefaultLogger(), nil)
+	clientApp := NewApp(ctx, logger, nil)
 
 	clientApp.Start(startTester)
 
@@ -30,21 +28,32 @@ func TestApp(t *testing.T) {
 
 // startClient - to be invoked on the App start, run in a goroutine as a Listener
 func startTester(ctx context.Context, app *App) ([]Listener, error) {
-	log := ctx.Value("logger").(*zap.Logger)
-	log.Info("test")
-	clientConfig := &client.ClientConfig{"test-client",
+	//log := ctx.Value("logger").(*zap.Logger)
+	//log.Info("test")
+	/*clientConfig := &client.ClientConfig{"test-client",
 		"localhost:8080",
 		500,
 		0,
 		0,
 		10000,
 		nil}
-	c := &client.Client{clientConfig, log}
+	c := &client.Client{clientConfig, log}*/
+
+	t := &Tester{}
 
 	// Start sending requests for the book quotes
 	return []Listener{
-		c,
+		t,
 	}, nil
+}
+
+type Tester struct {
+}
+
+func (c *Tester) Listen(ctx context.Context) error {
+	log := ctx.Value("logger").(*zap.Logger)
+	log.Info("test")
+	return nil
 }
 
 func CheckError(e error, t *testing.T) {

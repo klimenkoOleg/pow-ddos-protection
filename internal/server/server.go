@@ -128,7 +128,7 @@ func (s *Server) serveConn(conn net.Conn, connID uuid.UUID) {
 	// decrypt RSA, decode by gob
 	receivedDecreptedMsg, err = message.DecodeRSAGob(received[:n], *s.cfg.PrivateKey)
 	CheckErrOk(s.log, err)
-	s.log.Debug("Solution decoded : ", zap.Int("header", receivedDecreptedMsg.Header))
+	s.log.Debug("Solution recaived", zap.Int("header", receivedDecreptedMsg.Header))
 
 	if receivedDecreptedMsg.Header != message.Step3QuoteRequest {
 		s.log.Error(fmt.Sprintf("Incorrect state from client, expected %v, got %v",
@@ -138,7 +138,7 @@ func (s *Server) serveConn(conn net.Conn, connID uuid.UUID) {
 	// decode Payload into hashcash solution
 	err = json.Unmarshal(receivedDecreptedMsg.Payload, &hashcash)
 	CheckErrOk(s.log, err)
-	s.log.Debug("Solution decoded : ", zap.Int("header", receivedDecreptedMsg.Header))
+	s.log.Debug("Solution decoded", zap.Int("header", receivedDecreptedMsg.Header))
 
 	// validate hashcash params
 	if hashcash.Resource != conn.RemoteAddr().String() {

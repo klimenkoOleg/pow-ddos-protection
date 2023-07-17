@@ -6,13 +6,13 @@ services:
     build:
       dockerfile: deployments/server.Dockerfile
       context: .
-    restart: always
+    restart: "no"
 
   client:
     build:
       dockerfile: deployments/client.Dockerfile
       context: .
-    restart: always
+    restart: "no"
     depends_on:
       - server
     links:

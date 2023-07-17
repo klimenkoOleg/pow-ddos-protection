@@ -29,7 +29,7 @@ func (c *Client) Listen(ctx context.Context) error {
 	for i := 0; i < c.Cfg.NumberOfClients; i++ {
 		wg.Add(1)
 		go func() {
-			c.runClient(ctx, c.Cfg.ServerAddress, 500, c.Log, i)
+			c.runClient(ctx, c.Cfg.ServerAddress, 500, c.Log, i) // TODO 500
 			wg.Done()
 		}()
 		time.Sleep(time.Duration(creationPause))

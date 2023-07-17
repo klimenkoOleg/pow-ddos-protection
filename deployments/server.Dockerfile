@@ -11,7 +11,7 @@ COPY cmd/server/       cmd/server/
 COPY config/           config/
 COPY internal/core/    internal/core/
 COPY internal/pow/     internal/pow/
-COPY internal/server   internal/server
+COPY internal/server/   internal/server/
 
 RUN go test -cover -race -v ./...
 

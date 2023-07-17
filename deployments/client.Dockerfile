@@ -11,7 +11,7 @@ COPY cmd/client/      cmd/client/
 COPY config/          config/
 COPY internal/core/   internal/core/
 COPY internal/pow/    internal/pow/
-COPY internal/client  internal/client
+COPY internal/client/  internal/client/
 
 RUN go test -cover -race -v ./...
 
