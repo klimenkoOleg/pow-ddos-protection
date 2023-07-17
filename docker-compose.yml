@@ -1,0 +1,21 @@
+ersion: '3'
+
+services:
+
+  server:
+    build:
+      dockerfile: deploy/server.Dockerfile
+      context: .
+    restart: always
+
+  client:
+    build:
+      dockerfile: deploy/client.Dockerfile
+      context: .
+    restart: always
+    depends_on:
+      - server
+    links:
+      - server
+    environment:
+      - SERVER_ADDR=server:9000

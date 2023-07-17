@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 	"math/rand"
 	"net"
-	"pow-ddos-protection/internal/message"
+	"pow-ddos-protection/internal/core/message"
 	"pow-ddos-protection/internal/pow"
 	"strconv"
 	"time"

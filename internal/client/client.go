@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"go.uber.org/zap"
 	"net"
-	"pow-ddos-protection/internal/message"
+	"pow-ddos-protection/internal/core/message"
 	"pow-ddos-protection/internal/pow"
 	"sync"
 	"time"
