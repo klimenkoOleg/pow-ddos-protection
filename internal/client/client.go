@@ -21,14 +21,16 @@ type Client struct {
 
 // Listen invoked by App in a goroutine
 func (c *Client) Listen(ctx context.Context) error {
+	c.Log.Info("Starting client interaction... ")
 	creationPause := c.Cfg.RequestsCreationTimeout
 
 	wg := sync.WaitGroup{}
 
 	for i := 0; i < c.Cfg.NumberOfClients; i++ {
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			c.runClient(ctx, c.Cfg.ServerAddress, 500, c.Log, i)
+			wg.Done()
 		}()
 		time.Sleep(time.Duration(creationPause))
 	}
@@ -43,6 +45,7 @@ func (c *Client) runClient(ctx context.Context, serverAddr string, timeout int, 
 
 	for i := 0; i < c.Cfg.RequestsPerClient; i++ {
 		select {
+		// TODO
 		case <-ctx.Done():
 			return
 		default:
