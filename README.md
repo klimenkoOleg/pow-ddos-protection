@@ -22,6 +22,9 @@ docker compose up
 
 This command will fire up docker containers for server and client, perform compilation, run test, run the server and client services - inside the docker containers.
 
+The server will be up ad running forever (until interrupted by OS).
+The client will send numnber of requests specified by *client-config.yaml* parameters and exit.
+
 ## 4. Protocol definition
 This solution uses TCP-based protocol. 
 Message is encoded by gob and then encrypted by an asymmetric encryption algorithm - RSA.
