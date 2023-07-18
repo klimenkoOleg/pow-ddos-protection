@@ -15,6 +15,10 @@ const (
 	Step2TwoChallengeResponse        // from server to client - message with challenge for client
 	Step3QuoteRequest                // from client to server - message with solved challenge
 	Step4QuoteResponse               // from server to client - message with useful info is solution is correct, or with error if not
+	// ClientSideError  The type designed in the protocol, but not implemented due the time limitation.
+	ClientSideError = 400 // sent by server to client if server decides client made a message mistake.
+	// ServerSideError The type designed in the protocol, but not implemented due the time limitation.
+	ServerSideError = 500 //  sent by server to client if there is an internal server error.
 )
 
 const (
