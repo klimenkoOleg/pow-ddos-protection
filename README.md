@@ -49,11 +49,15 @@ I compared next three algorithms as more understandable and having most extensiv
 + [Hashcash](https://en.wikipedia.org/wiki/Hashcash)
 + [Guided tour puzzle](https://en.wikipedia.org/wiki/Guided_tour_puzzle_protocol)
 
-#### PoW algorithm I'd like to use
-I'd like to use Proof of Useful work because all other PoW algorithms use computer resources without signiificant outcome.
-The 
+#### <ins>PoW algorithm I'd like to use - Proof of Useful work</ins>
+I'd like to use **Proof of Useful work** because all other PoW algorithms use computer resources without signiificant outcome.
+The PoW may and should be used to useful calculations, for example ot multipli matrixes for ML, to train AI models, etc.
+But to implement this approach one need to spend significant amount of time and perform reliable testing. 
+At the moment of writing this, there are no good yet rrelatevely simple implementation of Proof of Useful Work (please refer to References att the end of the page).
+So, I rejected the idea of using the 
 
-#### PoW algorithm I selected on practice at the moment (mid 2023)
+
+#### <ins>PoW algorithm I selected on practice at the moment (mid 2023) - Hashcash</ins>
 After comparison, I chose Hashcash. Other algorithms have next disadvantages:
 + In Merkle tree server should do too much work to validate client's solution. For tree consists of 4 leaves and 3 depth server will spend 3 hash calculations.
 + In guided tour puzzle client should regularly request server about next parts of guide, that complicates logic of protocol.
