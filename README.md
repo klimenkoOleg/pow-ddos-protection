@@ -37,7 +37,7 @@ Solution supports 5 types of requests, switching by header:
 + 0 - 	Step1ChallengeRequest            // from client to server - request new challenge from server
 + 1 - 	Step2TwoChallengeResponse        // from server to client - message with challenge for client
 + 2	-  Step3QuoteRequest                // from client to server - message with solved challenge
-+ 3 - 	Step4QuoteResponse               // from server to client - message with useful info is solution is correct, or with error if not
++ 3 - 	Step4QuoteResponse               // from server to client - message with a quote
 
 ## 5. Proof of Work
 Idea of Proof of Work for DDOS protection is that client, which wants to get some resource from server, 
