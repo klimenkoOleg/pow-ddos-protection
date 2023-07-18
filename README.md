@@ -39,6 +39,10 @@ Solution supports 5 types of requests, switching by header:
 + 2	-  Step3QuoteRequest                // from client to server - message with solved challenge
 + 3 - 	Step4QuoteResponse               // from server to client - message with a quote
 
+There are additional types of messages, designed in the communication protocol but not implemented due to time limitation:
++ 400 - Client side error - sent by server to client if server decides client made a message mistake.
++ 500 - Server side error - sent by server to client if there is an internal server error.
+
 ## 5. Proof of Work
 Idea of Proof of Work for DDOS protection is that client, which wants to get some resource from server, 
 should firstly solve some challenge from server. 
