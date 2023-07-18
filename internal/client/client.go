@@ -29,7 +29,7 @@ func (c *Client) Listen(ctx context.Context) error {
 	for i := 0; i < c.Cfg.NumberOfClients; i++ {
 		wg.Add(1)
 		go func() {
-			c.runClient(ctx, c.Cfg.ServerAddress, 500, c.Log, i) // TODO 500
+			c.runClient(ctx, c.Cfg.ServerAddress, c.Cfg.RequestsCreationTimeout, c.Log, i)
 			wg.Done()
 		}()
 		time.Sleep(time.Duration(creationPause))
@@ -45,7 +45,6 @@ func (c *Client) runClient(ctx context.Context, serverAddr string, timeout int, 
 
 	for i := 0; i < c.Cfg.RequestsPerClient; i++ {
 		select {
-		// TODO
 		case <-ctx.Done():
 			return
 		default:

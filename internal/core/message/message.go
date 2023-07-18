@@ -11,7 +11,6 @@ import (
 
 // Header of TCP-message in protocol, means type of message
 const (
-	//Quit              = iota // on quit each side (server or client) should close connection
 	Step1ChallengeRequest     = iota // from client to server - request new challenge from server
 	Step2TwoChallengeResponse        // from server to client - message with challenge for client
 	Step3QuoteRequest                // from client to server - message with solved challenge
