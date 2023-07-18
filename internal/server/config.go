@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/rsa"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"pow-ddos-protection/internal/core/config"
 	"pow-ddos-protection/internal/core/encryption"
@@ -26,12 +27,12 @@ func LoadServerConfig(log *zap.Logger) (*ServerConfig, error) {
 	appCfg := &ServerConfig{}
 	err := config.LoadAppConfig(appCfg, baseConfigPath, envConfigPath)
 	if err != nil {
-		return nil, config.ErrRsaFile.Wrap(err)
+		return nil, errors.Wrap(err, "failed load configs")
 	}
 
 	privateKey, err := encryption.LoadPrivateRSA(rsaPrivateKey, log)
 	if err != nil {
-		return nil, config.ErrRsaFile.Wrap(err)
+		return nil, errors.Wrap(err, "failed parsing env vars")
 	}
 	appCfg.PrivateKey = privateKey
 

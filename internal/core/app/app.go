@@ -16,8 +16,7 @@ type OnShutdownFunc func(ctx context.Context)
 
 // App represents client application.
 type App struct {
-	ctx context.Context
-	//Cfg           *config.Config
+	ctx           context.Context
 	shutdownFuncs []OnShutdownFunc // called on the app exit
 	Log           *zap.Logger      // prefer explicit dependency over context or global variable
 	tracer        *tracing.Tracer  // prefer explicit dependency

@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  server:
+    build:
+      dockerfile: deployments/server.Dockerfile
+      context: .
+    restart: "no"
+
+  client:
+    build:
+      dockerfile: deployments/client.Dockerfile
+      context: .
+    restart: "no"
+    depends_on:
+      - server
+    links:
+      - server
+    environment:
+      - SERVER_ADDRESS=server:8080

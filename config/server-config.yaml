@@ -1,4 +1,5 @@
 port: "8080"
+app-name: "pow-server"
 hashcash-zeros-count: 3
 hashcash-timeout: 300
 hashcash-max-iterations: 1000000

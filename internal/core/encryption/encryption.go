@@ -16,7 +16,7 @@ func LoadPrivateRSA(fileName string, log *zap.Logger) (*rsa.PrivateKey, error) {
 		log.Error("Can't read private key file", zap.Error(err))
 		return nil, err
 	}
-	block, _ := pem.Decode([]byte(pemString))
+	block, _ := pem.Decode(pemString)
 	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		log.Error("Can't parse private key file", zap.Error(err))
